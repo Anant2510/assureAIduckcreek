@@ -99,6 +99,7 @@ const CASES = [
     id:"retain", tag:"RETENTION", icon:"🛡️",
     color:C.terracotta, bg:C.terraBg,
     title:"She's about to leave. You have 14 days.",
+    brief:"Three quiet signals across Billing, Claims, and Distribution add up to a 73% lapse probability — but only if someone connects them.",
     persona:"Sarah M. — Auto + Home, 7-year customer, $42K lifetime value",
     story:"Sarah missed a premium payment. She browsed a competitor's quote site. Her last claim was denied. None of these signals, on their own, triggers an alert in Duck Creek. Together, they spell a 73% lapse probability.",
     dcData:[
@@ -119,6 +120,7 @@ const CASES = [
     id:"grow", tag:"GROWTH", icon:"💎",
     color:C.blue, bg:C.blueBg,
     title:"He just bought a house. His policy doesn't know.",
+    brief:"A clean Term Life customer just had a major life event. The rider pricing exists in Duck Creek. Nobody is reaching out.",
     persona:"James C. — Term Life, 3-year customer, $1,800/yr premium",
     story:"James closed on a home three weeks ago. His Term Life policy has no mortgage protection rider, no critical illness coverage. Duck Creek has his policy. Public records have his home purchase. Nobody's connecting the dots.",
     dcData:[
@@ -139,6 +141,7 @@ const CASES = [
     id:"protect", tag:"PROTECTION", icon:"🔍",
     color:C.plum, bg:C.plumBg,
     title:"The fraud is hiding in plain sight — across four systems.",
+    brief:"A $280K fire claim with four red flags scattered across Claims, Policy, Billing, and Distribution — invisible until someone correlates them.",
     persona:"Policy #HC-7742 — Commercial Property, $280K reserve",
     story:"A $280K fire claim. Coverage was increased 40% two months before. Payment pattern changed from annual to monthly. The binding agency is brand new. Each signal lives in a different Duck Creek module. No human is connecting them fast enough.",
     dcData:[
@@ -170,6 +173,7 @@ function R({children,d=0,style={}}){const ref=useReveal();return <div ref={ref} 
 
 function Tag({text,color=C.gold}){return <span style={{fontSize:10,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color}}>{text}</span>;}
 function Src({t}){return <span style={{fontSize:10,color:C.textDim,fontStyle:"italic",display:"block",marginTop:6}}>Source: {t}</span>;}
+function Mark({children,color=C.gold}){return <span style={{background:`${color}1F`,color:C.text,padding:"1px 5px",borderRadius:3,fontWeight:700,boxDecorationBreak:"clone",WebkitBoxDecorationBreak:"clone"}}>{children}</span>;}
 
 // ═══ INTEGRATION FLOW DIAGRAM (SVG) ═══
 function IntegrationSVG(){
@@ -245,28 +249,32 @@ function IntegrationSVG(){
   </svg>;
 }
 
-// ═══ USE CASE CARD (always-expanded, screenshot-style) ═══
-function CaseCard({c}){
-  return <div style={{borderRadius:18,overflow:"hidden",border:`1px solid ${c.color}22`,background:C.white,boxShadow:C.shMd}}>
-    {/* Header */}
-    <div style={{padding:"24px 28px 20px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",borderBottom:`1px solid ${C.bdrLight}`}}>
-      <div style={{flex:1}}>
+// ═══ USE CASE CARD (clickable accordion) ═══
+function CaseCard({c, isOpen, onToggle}){
+  return <div style={{borderRadius:18,overflow:"hidden",border:`1px solid ${isOpen?c.color+'40':C.bdr}`,background:C.white,boxShadow:isOpen?C.shMd:C.sh,transition:"all .35s cubic-bezier(.22,1,.36,1)"}}>
+    {/* Clickable header */}
+    <div onClick={onToggle} style={{padding:"22px 28px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",cursor:"pointer",transition:"background .2s",background:isOpen?c.bg+"60":"transparent"}}
+      onMouseOver={e=>{if(!isOpen)e.currentTarget.style.background=C.cream;}}
+      onMouseOut={e=>{if(!isOpen)e.currentTarget.style.background="transparent";}}>
+      <div style={{flex:1,paddingRight:20}}>
         <Tag text={c.tag} color={c.color}/>
-        <h3 style={{fontFamily:serif,fontSize:24,fontWeight:700,color:C.text,margin:"10px 0 6px",lineHeight:1.25,fontStyle:"italic"}}>{c.title}</h3>
-        <p style={{fontSize:13,color:C.textMuted,lineHeight:1.5}}>{c.persona}</p>
+        <h3 style={{fontFamily:serif,fontSize:23,fontWeight:700,color:C.text,margin:"10px 0 6px",lineHeight:1.25,fontStyle:"italic"}}>{c.title}</h3>
+        <p style={{fontSize:13.5,color:C.textMuted,lineHeight:1.5,marginBottom:isOpen?0:8}}>{c.persona}</p>
+        {!isOpen && <p style={{fontSize:14,color:C.textSec,lineHeight:1.65,marginTop:10,maxWidth:560}}>{c.brief}</p>}
       </div>
-      <div style={{display:"flex",alignItems:"flex-start",gap:14,flexShrink:0,marginLeft:24,textAlign:"right"}}>
-        <div>
-          <div style={{fontFamily:mono,fontSize:28,fontWeight:700,color:c.color,letterSpacing:"-.01em"}}>{c.result.lift}</div>
-          <div style={{fontSize:11,color:C.textMuted,marginTop:2}}>{c.result.metric}</div>
+      <div style={{display:"flex",alignItems:"center",gap:14,flexShrink:0}}>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontFamily:mono,fontSize:26,fontWeight:700,color:c.color,letterSpacing:"-.01em",lineHeight:1}}>{c.result.lift}</div>
+          <div style={{fontSize:10.5,color:C.textMuted,marginTop:4}}>{c.result.metric}</div>
         </div>
+        <div style={{width:34,height:34,borderRadius:"50%",background:isOpen?c.color:C.cream,color:isOpen?"#fff":c.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,transition:"all .25s",transform:isOpen?"rotate(180deg)":"rotate(0)",flexShrink:0}}>▾</div>
       </div>
     </div>
 
-    {/* Body */}
-    <div style={{padding:"20px 28px 24px"}}>
+    {/* Body — only when open */}
+    {isOpen && <div style={{padding:"4px 28px 28px",animation:"fadeIn .35s ease",borderTop:`1px solid ${C.bdrLight}`,marginTop:0}}>
       {/* Story narrative — tinted box */}
-      <div style={{padding:"16px 20px",borderRadius:12,background:c.bg,borderLeft:`3px solid ${c.color}50`,marginBottom:18}}>
+      <div style={{padding:"16px 20px",borderRadius:12,background:c.bg,borderLeft:`3px solid ${c.color}50`,margin:"18px 0"}}>
         <p style={{fontSize:15,color:C.textSec,lineHeight:1.7}}>{c.story}</p>
       </div>
 
@@ -304,13 +312,14 @@ function CaseCard({c}){
           <Src t={c.src}/>
         </div>
       </div>
-    </div>
+    </div>}
   </div>;
 }
 
 // ═══ APP ═══
 function App(){
   const [scrollY,setScrollY]=useState(0);
+  const [openCase,setOpenCase]=useState("retain"); // first case open by default
   useEffect(()=>{const h=()=>setScrollY(window.scrollY);window.addEventListener('scroll',h,{passive:true});return()=>window.removeEventListener('scroll',h);},[]);
 
   const px="max(24px,min(8vw,120px))";
@@ -346,15 +355,15 @@ function App(){
           Turning the <span style={{color:C.blue}}>Intelligent Core</span><br/>into an <span style={{color:C.gold,fontStyle:"italic"}}>Intelligent Edge.</span>
         </h1></R>
         <R d={2}><p style={{fontSize:19,color:C.textSec,lineHeight:1.7,maxWidth:660}}>
-          Duck Creek is the industry's most comprehensive P&C core — <strong style={{color:C.text}}>$150B+ in annual premium, 2,600+ APIs, 7× Gartner MQ Leader.</strong> It runs insurance operations at scale. But operations and relationships are different problems.
+          Duck Creek is the industry's most comprehensive P&C core — <Mark color={C.blue}>$150B+ annual premium</Mark>, <Mark color={C.blue}>2,600+ APIs</Mark>, <Mark color={C.blue}>7× Gartner MQ Leader</Mark>. It runs insurance operations at scale. <strong style={{color:C.text}}>But operations and relationships are different problems.</strong>
         </p></R>
         <R d={3}><p style={{fontSize:17,color:C.text,lineHeight:1.75,maxWidth:660,marginTop:16}}>
-          This POV proposes a specific integration: <strong>AssureAI as the intelligence and activation layer that sits on top of Duck Creek</strong> — consuming its data, predicting policyholder behavior, and driving personalized engagement across every channel. Two platforms. One closed loop.
+          This POV proposes a specific integration: <strong>AssureAI as the intelligence and activation layer that sits on top of Duck Creek</strong> — consuming its data, predicting policyholder behavior, and driving personalized engagement across every channel. <Mark>Two platforms. One closed loop.</Mark>
         </p></R>
-        <R d={3}><div style={{marginTop:18,padding:"14px 20px",borderRadius:10,background:C.goldBg,border:`1px solid ${C.goldBdr}`,maxWidth:660}}>
-          <div style={{fontSize:10,fontWeight:700,color:C.goldDark,letterSpacing:".15em",marginBottom:5}}>IN PLAIN ENGLISH</div>
-          <p style={{fontSize:14.5,color:C.text,lineHeight:1.65}}>
-            Duck Creek already knows everything about your policyholders. AssureAI <strong>reads that knowledge in real time, predicts who's about to leave, who's about to buy more, and who looks like fraud — then acts on it automatically.</strong> No new core system. No replatforming.
+        <R d={3}><div style={{marginTop:18,padding:"16px 22px",borderRadius:10,background:C.goldBg,border:`1px solid ${C.goldBdr}`,maxWidth:660}}>
+          <div style={{fontSize:10.5,fontWeight:700,color:C.goldDark,letterSpacing:".15em",marginBottom:7}}>📌 IN PLAIN ENGLISH</div>
+          <p style={{fontSize:15,color:C.text,lineHeight:1.7}}>
+            Duck Creek already knows everything about your policyholders. AssureAI <strong>reads that knowledge in real time, predicts who's about to leave, who's about to buy more, and who looks like fraud — then acts on it automatically.</strong> <Mark>No new core system. No replatforming.</Mark>
           </p>
         </div></R>
         <R d={4}><p style={{fontSize:13,color:C.textMuted,marginTop:20,lineHeight:1.6,maxWidth:640}}>
@@ -374,22 +383,23 @@ function App(){
     <section style={{padding:`44px ${px}`,background:C.text,color:"#fff",position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 80% 50%, ${C.gold}15 0%, transparent 60%)`}}/>
       <div style={{maxWidth:mw,position:"relative"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:22}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:C.gold}}/>
-          <span style={{fontSize:10,fontWeight:700,letterSpacing:".18em",color:C.gold}}>EXECUTIVE SUMMARY</span>
+          <span style={{fontSize:10.5,fontWeight:700,letterSpacing:".18em",color:C.gold}}>EXECUTIVE SUMMARY</span>
+          <span style={{fontSize:10,color:"#888",fontStyle:"italic",marginLeft:6}}>The 30-second version</span>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:32}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:36}}>
           <div>
-            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:6}}>01 · THE PROBLEM</div>
-            <p style={{fontSize:14,color:"#fff",lineHeight:1.6,opacity:.92}}>Duck Creek runs the operations. The relationships — retention, cross-sell, fraud — sit unattended across siloed modules.</p>
+            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:8,fontWeight:700}}>01 · THE PROBLEM</div>
+            <p style={{fontSize:15,color:"#fff",lineHeight:1.65,opacity:.95}}>Duck Creek runs the operations. <strong style={{color:"#fff"}}>The relationships — retention, cross-sell, fraud — sit unattended</strong> across siloed modules.</p>
           </div>
           <div>
-            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:6}}>02 · THE FIX</div>
-            <p style={{fontSize:14,color:"#fff",lineHeight:1.6,opacity:.92}}>AssureAI sits on top of DC as the intelligence + activation layer — five gaps closed, not a rip-and-replace.</p>
+            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:8,fontWeight:700}}>02 · THE FIX</div>
+            <p style={{fontSize:15,color:"#fff",lineHeight:1.65,opacity:.95}}>AssureAI sits <strong style={{color:"#fff"}}>on top</strong> of DC as the intelligence + activation layer — <strong style={{color:"#fff"}}>five gaps closed</strong>, not a rip-and-replace.</p>
           </div>
           <div>
-            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:6}}>03 · THE PROOF</div>
-            <p style={{fontSize:14,color:"#fff",lineHeight:1.6,opacity:.92}}>+1.5–3 pts retention · up to 25% cross-sell lift · fraud flagged in hours, not weeks. 8 weeks to first measurable model output.</p>
+            <div style={{fontSize:11,fontFamily:mono,color:C.gold,marginBottom:8,fontWeight:700}}>03 · THE PROOF</div>
+            <p style={{fontSize:15,color:"#fff",lineHeight:1.65,opacity:.95}}><strong style={{color:C.goldLight}}>+1.5–3 pts retention</strong> · <strong style={{color:C.goldLight}}>up to 25% cross-sell lift</strong> · <strong style={{color:C.goldLight}}>fraud flagged in hours</strong>, not weeks. <strong style={{color:"#fff"}}>8 weeks</strong> to first measurable model output.</p>
           </div>
         </div>
       </div>
@@ -401,7 +411,7 @@ function App(){
         <R><Tag text="The Two Halves"/></R>
         <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 12px",lineHeight:1.25}}>Duck Creek excels at <span style={{color:C.blue}}>processing.</span> AssureAI excels at <span style={{color:C.gold,fontStyle:"italic"}}>personalizing.</span></h2></R>
         <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.7,maxWidth:660,marginBottom:30}}>
-          Think of Duck Creek as <strong>the engine room</strong> — issuing policies, collecting premium, settling claims. Think of AssureAI as <strong>the bridge</strong> — watching the data the engine room produces and steering customer conversations in real time. The two work together; neither replaces the other.
+          Think of Duck Creek as <Mark color={C.blue}>the engine room</Mark> — issuing policies, collecting premium, settling claims. Think of AssureAI as <Mark>the bridge</Mark> — watching the data the engine room produces and steering customer conversations in real time. <strong style={{color:C.text}}>The two work together; neither replaces the other.</strong>
         </p></R>
 
         <div style={{display:"grid",gridTemplateColumns:"1fr 40px 1fr",gap:0,alignItems:"start"}}>
@@ -445,7 +455,7 @@ function App(){
         <R><Tag text="The Gap" color={C.terracotta}/></R>
         <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 12px",lineHeight:1.25}}>Duck Creek runs your operations.<br/>Nobody's running your <span style={{color:C.terracotta,fontStyle:"italic"}}>relationships.</span></h2></R>
         <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.7,maxWidth:660,marginBottom:30}}>
-          Five specific gaps separate "running insurance" from "growing it." Each row below names a gap, shows what Duck Creek does today, what AssureAI adds — and <strong style={{color:C.text}}>why it matters in dollars and customers.</strong>
+          Five specific gaps separate <strong style={{color:C.text}}>"running insurance"</strong> from <strong style={{color:C.text}}>"growing it."</strong> Each row below names a gap, shows what Duck Creek does today, what AssureAI adds — and <Mark color={C.terracotta}>why it matters in dollars and customers</Mark>.
         </p></R>
 
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -471,11 +481,11 @@ function App(){
         </div>
 
         <R>
-          <div style={{marginTop:24,padding:"18px 24px",borderRadius:14,background:C.white,border:`1px solid ${C.bdr}`,boxShadow:C.sh}}>
+          <div style={{marginTop:24,padding:"20px 26px",borderRadius:14,background:C.white,border:`1px solid ${C.bdr}`,boxShadow:C.sh}}>
             <p style={{fontSize:13.5,color:C.textSec,lineHeight:1.75}}>
-              <strong style={{color:C.text}}>On Duck Creek's Agentic AI (April 2026):</strong> DC launched a powerful agentic platform for operational AI — underwriting triage and claims intake. It's impressive. But it focuses on internal efficiency, not policyholder-facing personalization. These are complementary investments, not competing ones.
+              <strong style={{color:C.text}}>📌 On Duck Creek's Agentic AI (April 2026):</strong> DC launched a powerful agentic platform for operational AI — underwriting triage and claims intake. It's impressive. <strong style={{color:C.text}}>But it focuses on internal efficiency, not policyholder-facing personalization.</strong> <Mark color={C.green}>These are complementary investments, not competing ones.</Mark>
             </p>
-            <span style={{fontSize:10,color:C.textDim,fontStyle:"italic",display:"block",marginTop:6}}>Source: Duck Creek Agentic AI Platform launch, PRNewswire, April 28, 2026</span>
+            <span style={{fontSize:10,color:C.textDim,fontStyle:"italic",display:"block",marginTop:8}}>Source: Duck Creek Agentic AI Platform launch, PRNewswire, April 28, 2026</span>
           </div>
         </R>
       </div>
@@ -487,12 +497,12 @@ function App(){
         <R><Tag text="The Integration"/></R>
         <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 12px",lineHeight:1.25}}>How they <span style={{color:C.gold,fontStyle:"italic"}}>actually connect.</span></h2></R>
         <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.7,maxWidth:660,marginBottom:18}}>
-          Closing those five gaps doesn't need middleware or black boxes. <strong style={{color:C.text}}>Two channels do it</strong> — Duck Creek's APIs for real-time events (a payment missed, a claim filed) and Clarity Snowflake for historical data (years of policy and claims history that ML models learn from). A feedback loop sends every outcome back into Duck Creek, so the next decision is smarter than the last.
+          Closing those five gaps doesn't need middleware or black boxes. <Mark>Two channels do it</Mark> — Duck Creek's APIs for real-time events (a payment missed, a claim filed) and Clarity Snowflake for historical data (years of policy and claims history that ML models learn from). A feedback loop sends every outcome back into Duck Creek, so <strong style={{color:C.text}}>the next decision is smarter than the last.</strong>
         </p></R>
-        <R d={2}><div style={{marginBottom:30,padding:"12px 18px",borderRadius:10,background:C.greenBg,border:`1px solid ${C.green}25`,maxWidth:660}}>
-          <div style={{fontSize:10,fontWeight:700,color:C.green,letterSpacing:".15em",marginBottom:4}}>WHAT IT MEANS</div>
-          <p style={{fontSize:13.5,color:C.textSec,lineHeight:1.6}}>
-            Nothing inside Duck Creek changes. AssureAI plugs in through doors that already exist. The integration uses standard interfaces — the kind your team already maintains.
+        <R d={2}><div style={{marginBottom:30,padding:"14px 22px",borderRadius:10,background:C.greenBg,border:`1px solid ${C.green}25`,maxWidth:660}}>
+          <div style={{fontSize:10.5,fontWeight:700,color:C.green,letterSpacing:".15em",marginBottom:5}}>📌 WHAT IT MEANS</div>
+          <p style={{fontSize:14,color:C.textSec,lineHeight:1.65}}>
+            <strong style={{color:C.text}}>Nothing inside Duck Creek changes.</strong> AssureAI plugs in through doors that already exist. The integration uses standard interfaces — <strong>the kind your team already maintains.</strong>
           </p>
         </div></R>
         <R><IntegrationSVG/></R>
@@ -521,7 +531,7 @@ function App(){
         <R><Tag text="The Transformation" color={C.terracotta}/></R>
         <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 12px",lineHeight:1.25}}>What changes when <span style={{color:C.blue}}>Duck Creek</span> meets <span style={{color:C.gold,fontStyle:"italic"}}>AssureAI.</span></h2></R>
         <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.7,maxWidth:660,marginBottom:30}}>
-          Five everyday operational areas. Each row shows life today (DC alone), life tomorrow (DC + AssureAI), and the measurable upside — sourced from Bain, Lorikeet, Allianz, and others.
+          Five everyday operational areas. Each row shows life today (DC alone), life tomorrow (DC + AssureAI), and <Mark color={C.terracotta}>the measurable upside</Mark> — sourced from Bain, Lorikeet, Allianz, and others.
         </p></R>
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           {BEFORE_AFTER.map((b,i)=><R key={i}>
@@ -550,11 +560,17 @@ function App(){
       <div style={{maxWidth:mw}}>
         <R><Tag text="Proof Points"/></R>
         <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 10px",lineHeight:1.25}}>Three policyholders. <span style={{color:C.gold,fontStyle:"italic"}}>Real data. Real math.</span></h2></R>
-        <R d={2}><p style={{fontSize:16,color:C.textSec,lineHeight:1.75,maxWidth:660,marginBottom:36}}>
-          Each story shows the same pattern: signals already exist inside Duck Creek but sit in different silos. AssureAI connects them, predicts what's about to happen, and acts before the moment passes. The numbers are sourced.
+        <R d={2}><p style={{fontSize:16,color:C.textSec,lineHeight:1.75,maxWidth:660,marginBottom:18}}>
+          Each story shows the same pattern: signals already exist inside Duck Creek but sit in different silos. AssureAI connects them, predicts what's about to happen, and acts before the moment passes. <Mark>The numbers are sourced.</Mark>
         </p></R>
-        <div style={{display:"flex",flexDirection:"column",gap:18}}>
-          {CASES.map(c=><R key={c.id}><CaseCard c={c}/></R>)}
+        <R d={3}><div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:20,background:C.goldBg,border:`1px solid ${C.goldBdr}`,marginBottom:30}}>
+          <span style={{fontSize:13}}>👆</span>
+          <span style={{fontSize:12,color:C.textSec,fontWeight:500}}>Click any card to expand the full data flow and outcome</span>
+        </div></R>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          {CASES.map(c=><R key={c.id}>
+            <CaseCard c={c} isOpen={openCase===c.id} onToggle={()=>setOpenCase(openCase===c.id?null:c.id)}/>
+          </R>)}
         </div>
       </div>
     </section>
@@ -563,15 +579,17 @@ function App(){
     <section style={{padding:`70px ${px}`,background:C.cream}}>
       <div style={{maxWidth:mw}}>
         <R><Tag text="Why Coforge"/></R>
-        <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 10px",lineHeight:1.25}}>The only team that knows <span style={{color:C.blue,fontStyle:"italic"}}>both sides.</span></h2></R>
-        <R d={2}><p style={{fontSize:15,color:C.textSec,lineHeight:1.8,maxWidth:640,marginBottom:30}}>
-          This integration works because Coforge built both ends. We're Duck Creek's Premier SI Partner — we've configured these APIs, migrated this data, and optimized these workflows for 20 years. And we built AssureAI specifically to fill the gap we've seen across every implementation.
+        <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,margin:"14px 0 12px",lineHeight:1.25}}>The only team that knows <span style={{color:C.blue,fontStyle:"italic"}}>both sides.</span></h2></R>
+        <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.7,maxWidth:660,marginBottom:30}}>
+          This integration works because <Mark>Coforge built both ends</Mark>. We're Duck Creek's Premier SI Partner — we've configured these APIs, migrated this data, and optimized these workflows for <strong style={{color:C.text}}>20 years</strong>. And we built AssureAI specifically to fill the gap we've seen across every implementation.
         </p></R>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
           {[{n:"20 yrs",l:"DC partnership"},{n:"1,000+",l:"dedicated DC consultants"},{n:"Top 3",l:"global DC SI partner"},{n:"2×",l:"Standard of Excellence Award"}].map((s,i)=>
-            <R key={i} d={i}><div style={{padding:"24px 16px",borderRadius:14,background:C.white,border:`1px solid ${C.bdr}`,boxShadow:C.sh,textAlign:"center"}}>
-              <div style={{fontFamily:mono,fontSize:26,fontWeight:700,color:C.gold}}>{s.n}</div>
-              <div style={{fontSize:11,color:C.textSec,marginTop:4}}>{s.l}</div>
+            <R key={i} d={i}><div style={{padding:"26px 16px",borderRadius:14,background:C.white,border:`1px solid ${C.bdr}`,boxShadow:C.sh,textAlign:"center",transition:"transform .2s, box-shadow .2s"}}
+              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=C.shMd;}}
+              onMouseOut={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=C.sh;}}>
+              <div style={{fontFamily:mono,fontSize:28,fontWeight:700,color:C.gold,letterSpacing:"-.01em"}}>{s.n}</div>
+              <div style={{fontSize:12,color:C.textSec,marginTop:5,lineHeight:1.4}}>{s.l}</div>
             </div></R>
           )}
         </div>
@@ -582,9 +600,9 @@ function App(){
     <section style={{padding:`80px ${px}`,background:C.goldBg,borderTop:`1px solid ${C.goldBdr}`,textAlign:"center"}}>
       <div style={{maxWidth:520,margin:"0 auto"}}>
         <R><div style={{width:44,height:44,borderRadius:12,background:`linear-gradient(135deg,${C.blue},${C.gold})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px",fontSize:20}}>🔗</div></R>
-        <R d={1}><h2 style={{fontFamily:serif,fontSize:30,fontWeight:700,color:C.text}}>Let's prove the integration works — on your data.</h2></R>
-        <R d={2}><p style={{fontSize:14,color:C.textSec,lineHeight:1.8,margin:"14px auto 28px"}}>
-          Connect to DC Policy + Billing via Clarity Snowflake. Train one propensity model. Measure lift on a 5,000-policyholder segment. <strong>8 weeks to first model output.</strong>
+        <R d={1}><h2 style={{fontFamily:serif,fontSize:32,fontWeight:700,color:C.text,lineHeight:1.25}}>Let's prove the integration works — <span style={{color:C.gold,fontStyle:"italic"}}>on your data.</span></h2></R>
+        <R d={2}><p style={{fontSize:15.5,color:C.textSec,lineHeight:1.75,margin:"16px auto 28px",maxWidth:480}}>
+          Connect to DC Policy + Billing via Clarity Snowflake. Train one propensity model. Measure real lift on a 5,000-policyholder pilot. <Mark>8 weeks to first model output.</Mark>
         </p></R>
         <R d={3}><div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
           <a href="mailto:assureai@coforge.com?subject=AssureAI%20%C3%97%20Duck%20Creek%20%E2%80%94%20Integration%20Workshop" style={{padding:"13px 28px",background:`linear-gradient(135deg,${C.gold},${C.terracotta})`,color:"#fff",border:"none",borderRadius:12,fontSize:14,fontWeight:700,cursor:"pointer",boxShadow:`0 4px 20px ${C.gold}25`,transition:"transform .2s",textDecoration:"none",display:"inline-block"}}
